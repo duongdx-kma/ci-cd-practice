@@ -69,17 +69,18 @@ module "bastion_key" {
   path_to_public_key = "keys/bastion-key.pem.pub"
 }
 
+# terraform apply -auto-approve -target=module.vpc -target=module.security-groups -target=module.bastion_key -target=module.jenkins
 module "jenkins" {
-  source                 = "../modules/ec2-instance"
-  module_name            = "jenkins-host"
-  instance_name          = "jenkins-instance"
-  instance_type          = "t2.medium"
-  instance_key_name       = module.bastion_key.bastion_key_name
-  path_to_user_data_script = "scripts/install-jenkins.sh"
-  path_to_private_key    = "keys/bastion-key.pem"
-  path_to_worker_key     = "keys/worker.pem"
-  vpc_security_group_ids = [module.security-groups.jenkins_sg_id]
-  subnet_id              = module.vpc.public_subnets[0]
+  source                   = "../modules/ec2-instance"
+  module_name              = "jenkins-host"
+  instance_name            = "jenkins-instance"
+  instance_type            = "t2.medium"
+  instance_key_name        = module.bastion_key.bastion_key_name
+  path_to_user_data_script = "../scripts/install-jenkins.sh"
+  path_to_private_key      = "keys/bastion-key.pem"
+  path_to_worker_key       = "keys/worker.pem"
+  vpc_security_group_ids   = [module.security-groups.jenkins_sg_id]
+  subnet_id                = module.vpc.public_subnets[0]
 
   tags = merge(
     local.common_tags,
@@ -89,23 +90,22 @@ module "jenkins" {
   )
 }
 
+# module "ansible_control_host" {
+#   source                   = "../modules/ec2-instance"
+#   module_name              = "ansible-control-host"
+#   instance_name            = "ansible-control-instance"
+#   instance_type            = "t2.small"
+#   instance_key_name        = module.bastion_key.bastion_key_name
+#   path_to_user_data_script = "../scripts/install-ansible.sh"
+#   path_to_private_key      = "keys/bastion-key.pem"
+#   path_to_worker_key       = "keys/worker.pem"
+#   vpc_security_group_ids   = [module.security-groups.bastion_sg_id]
+#   subnet_id                = module.vpc.public_subnets[1]
 
-module "ansible_control_host" {
-  source                 = "../modules/ec2-instance"
-  module_name            = "ansible-control-host"
-  instance_name          = "ansible-control-instance"
-  instance_type          = "t2.small"
-  instance_key_name       = module.bastion_key.bastion_key_name
-  path_to_user_data_script = "scripts/install-ansible.sh"
-  path_to_private_key    = "keys/bastion-key.pem"
-  path_to_worker_key     = "keys/worker.pem"
-  vpc_security_group_ids = [module.security-groups.bastion_sg_id]
-  subnet_id              = module.vpc.public_subnets[1]
-
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "Ansible-Control-Host"
-    }
-  )
-}
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "Ansible-Control-Host"
+#     }
+#   )
+# }

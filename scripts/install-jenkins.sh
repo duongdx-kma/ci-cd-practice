@@ -2,6 +2,7 @@
 
 set -e
 
+# Install Jenkins
 # Update the instance
 yum update -y
 
@@ -22,3 +23,16 @@ systemctl enable jenkins
 
 # Start Jenkins service
 systemctl start jenkins
+
+# Install Maven
+MAVEN_VERSION=3.9.5
+MAVEN_DIR=/opt/maven
+
+wget https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
+mkdir -p $MAVEN_DIR
+tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C $MAVEN_DIR
+ln -s $MAVEN_DIR/apache-maven-$MAVEN_VERSION /opt/maven/latest
+ln -s /opt/maven/latest/bin/mvn /usr/bin/mvn
+
+# Verify Maven installation
+mvn -version

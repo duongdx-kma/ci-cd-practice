@@ -1,25 +1,25 @@
+# Data source to get the most recent Amazon Linux 2 AMI
 data "aws_ami" "amz_linux2" {
   most_recent = true
-  owners = [ "amazon" ]
+  owners      = ["amazon"]
 
   filter {
-    name = "root-device-type"
-    values = [ "ebs" ]
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 
   filter {
-    name = "name"
+    name   = "name"
     values = ["amzn2-ami-hvm-*-gp2"]
   }
 
   filter {
-    name = "virtualization-type"
+    name   = "virtualization-type"
     values = ["hvm"]
   }
 
   filter {
-    name = "architecture"
+    name   = "architecture"
     values = ["x86_64"]
   }
 }
-
