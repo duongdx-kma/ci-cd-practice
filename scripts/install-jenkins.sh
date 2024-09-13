@@ -16,7 +16,7 @@ wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenki
 rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
 # Install Jenkins and Git
-yum install -y jenkins git
+yum install -y jenkins git tree
 
 # Enable Jenkins service to start on boot
 systemctl enable jenkins
