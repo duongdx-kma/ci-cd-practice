@@ -11,7 +11,7 @@ module "ec2_instance" {
 
   # check ec2 instance log: sudo cat /var/log/cloud-init-output.log
   # Conditionally set user_data only if not a worker instance
-  user_data              = var.is_worker ? null : file(var.path_to_user_data_script)
+  user_data              = (var.path_to_user_data_script != "" && var.path_to_user_data_script != null) ? file(var.path_to_user_data_script) : ""
 
   tags = var.tags
 }
@@ -42,4 +42,8 @@ resource "null_resource" "copy_ec2_keys" {
 
 output "ec2_public_ip" {
   value = module.ec2_instance.public_ip
+}
+
+output "ec2_private_ip" {
+  value = module.ec2_instance.private_ip
 }

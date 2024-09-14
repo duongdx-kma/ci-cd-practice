@@ -1,4 +1,32 @@
-## I. Maven Default Lifecycle
+## I. Create `Spring Boot Project` with Maven
+### 1. create project:
+```powershell
+# command
+mvn archetype:generate -DgroupId=com.duongdx -DartifactId=spring-boot-project -DarchetypeArtifactId=maven-archetype-webapp -DarchetypeVersion=1.5 -DinteractiveMode=false
+
+# result:
+> tree -L 1 ./
+./
+├── spring-boot-project
+├── vprofile-project
+└── worker.pem
+
+```
+
+## II. Maven for Devops
+### 1. Maven `.m2` folder:
+```t
+The .m2 folder is the default location where Maven stores its local repository(downloaded dependencies).
+It contains settings.xml file which includes Maven configurations like repository locations, proxy settings etc.
+
+It is a hidden folder, if not able to access it then you may need to enable the display of hidden files and folders in your file explorer.
+
+The locations depends on the OS.
+If Windows- C:\Users\{username}\.m2
+Mac- /Users/{username}/.m2
+Linux- /home/{username}/.m2
+```
+### 2. Maven Default Lifecycle
 
 | **Phase**               | **Description**                                                                 |
 |-------------------------|---------------------------------------------------------------------------------|
@@ -26,6 +54,60 @@
 | **install**             | Install the package into the local repository, for use as a dependency in other projects locally. |
 | **deploy**              | Done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects. |
 
+### 3. `maven` goal:
+```t
+1. `validate`: Checks if the project is correct and all necessary information is `available`.
+2. `compile`: Compiles the source code of the project.
+3. `test-compile`: Compiles the test source code.
+4. `test`: Runs the unit tests using a testing framework (JUnit, TestNG, etc.).
+5. `package`: Packages the compiled code into a JAR, WAR, etc.
+6. `integration-test`: Processes and deploys the package if necessary to run integration tests.
+7. `verify`: Runs checks to ensure the package is valid and meets quality standards.
+8. `install`: Installs the package into the local Maven repository. maven save artifact to `~/.m2/repository`
+9. `deploy`: Copies the final package to the remote repository for sharing with other developers or projects.
+```
+
+### 4. `maven test` goal:
+```t
+-  `validate`
+-  `compile`
+-  `test-compile`
+-  `test` (Runs unit tests)
+```
+
+### 5. `maven verify` goal:
+```t
+- `validate`
+-  `compile`
+-  `test-compile`
+-  `test` (Runs unit tests)
+-  `package` (Packages the code)
+-  `integration-test` (Runs integration tests)
+-  `verify` (Performs additional checks like quality gates, package verification, etc.)
+```
+### 6. `maven install` goal:
+```t
+`validate`: Ensures the project is valid and all information is available.
+`compile`: Compiles the source code.
+`test-compile`: Compiles the test code.
+`test`: Runs the unit tests.
+`package`: Packages the compiled code into a distributable format, such as a JAR or WAR.
+`integration-test`: If applicable, runs integration tests.
+`verify`: Runs any additional checks to verify the project is valid and meets `quality` standards.
+`install`: Installs the package into the local Maven repository.
+```
+
+### 7: note `pom.xml`
+
+**WAR**
+```
+A WAR (Web Application Archive) file is typically used for packaging web applications (usually Java EE or Jakarta EE projects). A WAR file contains all the resources (HTML, CSS, JavaScript, etc.) and Java classes that are needed to deploy a web application on a servlet container like Tomcat, JBoss, or Jetty.
+```
+
+**JAR**
+```
+A JAR (Java Archive) file, on the other hand, is usually for standalone Java applications or libraries. It's used when your project doesn’t have a web interface or a need for a servlet container.
+```
 
 ## II. Maven install
 ### 1. install maven
@@ -81,116 +163,96 @@ mvn-3.9.9 --version
 
 ### step-1: clone the repository with `git`
 ```powershell
-git clone https://github.com/duongdx-kma/first-demo-project.
+git clone https://github.com/duongdx-kma/vprofile-project.
+
+# project structure
+├── ansible
+├── files
+├── Jenkinsfile
+├── logo.png
+├── pom.xml
+├── README.md
+└── src
 ```
 
-### step-2: Validate the project with `maven`
+### step-2: `Validate` the project with `maven`
 ```powershell
 # change directory
-cd first-demo-project
+cd vprofile-project
 
 # command:
 mvn validate
-
-# result:
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] -----------------< com.democompany:first-demo-project >-----------------
-[INFO] Building first-demo-project 0.0.1-SNAPSHOT
-[INFO]   from pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  0.075 s
-[INFO] Finished at: 2024-09-13T16:48:16Z
 ```
 
-### step-3: compile code with `maven`:
+### step-3: `test` code with `maven test`: this command install all dependence and `target` folder is generated
 ```powershell
 # command:
 mvn compile
 
-# result:
+# result: The `target` folder is generated
+├── ansible
+├── files
+├── Jenkinsfile
+├── logo.png
+├── pom.xml
+├── README.md
+├── src
+└── target
 
-Downloaded from central: https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0-M9/qdox-2.0-M9.jar (317 kB at 20 MB/s)
-...........................................
-Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.8.4/plexus-compiler-api-2.8.4.jar (27 kB at 1.4 MB/s)
-[INFO] Changes detected - recompiling the module!
-[INFO] Compiling 1 source file to /home/ec2-user/first-demo-project/target/classes
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  2.990 s
-[INFO] Finished at: 2024-09-13T16:50:37Z
-[INFO] ------------------------------------------------------------------------
-
-# check JAR result
-
+# to remote target: mvn clean
+├── ansible
+├── files
+├── Jenkinsfile
+├── logo.png
+├── pom.xml
+├── README.md
+└── src
 ```
 
-### step-4: Running test into test-directory with `maven`:
+### step-4: `install` code with `maven install` command:
 ```powershell
 # command:
-mvn test-compile
+mvn install
 
+# checking
+tree -L 1 target/
 
-# result:
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] -----------------< com.democompany:first-demo-project >-----------------
-[INFO] Building first-demo-project 0.0.1-SNAPSHOT
-[INFO]   from pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-
-...------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  1.845 s
-[INFO] Finished at: 2024-09-13T16:58:27Z
-[INFO] ------------------------------------------------------------------------
+# result: check node bellow
+├── ansible
+├── files
+├── Jenkinsfile
+├── logo.png
+├── pom.xml
+├── README.md
+├── src
+└── target
+    ├── ...
+    ├── vprofile-v2
+    └── vprofile-v2.war
 ```
+**check pom.xml**
+```powershell
+    <groupId>com.visualpathit</groupId>
+    <artifactId>vprofile</artifactId>
+    <packaging>war</packaging>
+    <version>v2</version>
+```
+**explanation pom.xml**
+```
+<groupId>: This represents the organization or group to which the project belongs (like a namespace).
+<artifactId>: This is the name of the project or artifact (in your case, vprofile-v2).
+<version>: This is the version of your project (in this case, 1.0.0).
+<packaging>: This defines the packaging type. If this is set to war, it generates a .war file. If it’s jar, Maven will produce a .jar file.
+```
+
 
 ### step-5: check project structure:
 ```powershell
-.
-├── pom.xml
-├── src
-│   ├── main
-│   │   └── java
-│   │       └── com
-│   │           └── democompany
-│   │               └── first_demo_project
-│   │                   └── App.java
-│   └── test
-│       └── java
-│           └── com
-│               └── democompany
-│                   └── first_demo_project
-│                       └── AppTest.java
-└── target
-    ├── classes
-    │   └── com
-    │       └── democompany
-    │           └── first_demo_project
-    │               └── App.class
-    ├── generated-sources
-    │   └── annotations
-    ├── generated-test-sources
-    │   └── test-annotations
-    ├── maven-status
-    │   └── maven-compiler-plugin
-    │       ├── compile
-    │       │   └── default-compile
-    │       │       ├── createdFiles.lst
-    │       │       └── inputFiles.lst
-    │       └── testCompile
-    │           └── default-testCompile
-    │               ├── createdFiles.lst
-    │               └── inputFiles.lst
-    └── test-classes
-        └── com
-            └── democompany
-                └── first_demo_project
-                    └── AppTest.class
+
+```
+
+### NOTE-01: clean `maven dependencies`:
+```powershell
+# command:
+rm -rf $HOME/.m2
 ```

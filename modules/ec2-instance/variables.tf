@@ -16,10 +16,22 @@ variable "instance_key_name" {
 
 variable "path_to_private_key" {
   type = string
+  default = null
+
+  validation {
+    condition = !(var.is_worker == true && var.path_to_private_key != null)
+    error_message = "path_to_private_key must be NULL when is_worker is true."
+  }
 }
 
 variable "path_to_worker_key" {
   type = string
+  default = null
+
+  validation {
+    condition = !(var.is_worker == true && var.path_to_worker_key != null)
+    error_message = "path_to_worker_key must be NULL when is_worker is true."
+  }
 }
 
 variable "vpc_security_group_ids" {
@@ -47,9 +59,4 @@ variable is_worker {
 variable path_to_user_data_script {
   type = string
   default = null
-
-  validation {
-    condition = !(var.is_worker == false && var.path_to_user_data_script == null)
-    error_message = "path_to_user_data_script must be specified when is_worker is false."
-  }
 }

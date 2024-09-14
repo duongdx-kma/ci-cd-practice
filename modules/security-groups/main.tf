@@ -32,10 +32,35 @@ module "jenkins_sg" {
   tags = var.tags
 }
 
+module "jenkins_agent_sg" {
+  source      = "terraform-aws-modules/security-group/aws"
+  version     = "5.1.2"
+  name        = "jenkins-agent-sg"
+  description = "Security group for Jenkins server with SSH ports open within VPC"
+  vpc_id      = var.vpc_id
+
+  # Ingress rule and CIDR
+  ingress_with_source_security_group_id = [
+    {
+      from_port                = 22
+      to_port                  = 22
+      protocol                 = "tcp"
+      description              = "Allow port 22 from Jenkins server"
+      source_security_group_id = module.jenkins_sg.security_group_id
+    }
+  ]
+
+  # Egress rules
+  egress_rules = ["all-all"]
+
+  # resource tags
+  tags = var.tags
+}
+
 
 module "alb_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
+  source      = "terraform-aws-modules/security-group/aws"
+  version     = "5.1.2"
   name        = "alb-sg"
   description = "Security group for ALB"
   vpc_id      = var.vpc_id
@@ -58,7 +83,7 @@ module "alb_sg" {
   ]
 
   egress_rules = ["all-all"]
-  tags = var.tags
+  tags         = var.tags
 }
 
 module "webserver_sg" {
@@ -94,7 +119,43 @@ module "webserver_sg" {
   ]
 
   egress_rules = ["all-all"]
-  tags = var.tags
+  tags         = var.tags
+}
+
+module "public_webserver_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.2"
+
+  name        = "public-webserver-sg"
+  description = "Security group for public-webserver"
+  vpc_id      = var.vpc_id
+
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      description = "Allow port 8080 from every where"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      from_port   = 8443
+      to_port     = 8443
+      protocol    = "tcp"
+      description = "Allow port 8443 from ALB"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      description = "Allow SSH from bastion host"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+
+  egress_rules = ["all-all"]
+  tags         = var.tags
 }
 
 module "database_sg" {
@@ -130,5 +191,5 @@ module "database_sg" {
   ]
 
   egress_rules = ["all-all"]
-  tags = var.tags
+  tags         = var.tags
 }
