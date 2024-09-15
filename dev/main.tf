@@ -74,7 +74,7 @@ module "jenkins" {
   source                   = "../modules/ec2-instance"
   module_name              = "jenkins-host"
   instance_name            = "jenkins-instance"
-  instance_type            = "t3.medium"
+  instance_type            = "t3.small"
   instance_key_name        = module.bastion_key.bastion_key_name
   path_to_user_data_script = "../scripts/install-jenkins.sh"
   path_to_private_key      = "keys/bastion-key.pem"
@@ -96,49 +96,49 @@ module "worker_key" {
   path_to_public_key = "keys/worker.pem.pub"
 }
 
-module "maven_instance" {
-  source                   = "../modules/ec2-instance"
-  is_worker                = true
-  module_name              = "maven-host"
-  instance_name            = "maven-instance"
-  instance_type            = "t2.micro"
-  instance_key_name        = module.worker_key.bastion_key_name
-  path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
-  vpc_security_group_ids   = [module.security-groups.jenkins_agent_sg_id]
-  subnet_id                = module.vpc.public_subnets[1]
-
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "Maven-Server"
-    }
-  )
-}
-
-# module "web_server" {
+# module "maven_instance" {
 #   source                   = "../modules/ec2-instance"
 #   is_worker                = true
-#   module_name              = "web-server"
-#   instance_name            = "web-server-instance"
-#   instance_type            = "t2.small"
+#   module_name              = "maven-host"
+#   instance_name            = "maven-instance"
+#   instance_type            = "t3.micro"
 #   instance_key_name        = module.worker_key.bastion_key_name
-#   path_to_user_data_script = "../scripts/install-tomcat.sh"
-#   vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
-#   subnet_id                = module.vpc.public_subnets[0]
+#   path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
+#   vpc_security_group_ids   = [module.security-groups.jenkins_agent_sg_id]
+#   subnet_id                = module.vpc.public_subnets[1]
 
 #   tags = merge(
 #     local.common_tags,
 #     {
-#       Name = "Web-Server"
+#       Name = "Maven-Server"
 #     }
 #   )
 # }
+
+module "web_server" {
+  source                   = "../modules/ec2-instance"
+  is_worker                = true
+  module_name              = "web-server"
+  instance_name            = "web-server-instance"
+  instance_type            = "t3.micro"
+  instance_key_name        = module.worker_key.bastion_key_name
+  path_to_user_data_script = "../scripts/install-tomcat.sh"
+  vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
+  subnet_id                = module.vpc.public_subnets[0]
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "Web-Server"
+    }
+  )
+}
 
 # module "ansible_control_host" {
 #   source                   = "../modules/ec2-instance"
 #   module_name              = "ansible-control-host"
 #   instance_name            = "ansible-control-instance"
-#   instance_type            = "t2.small"
+#   instance_type            = "t3.micro"
 #   instance_key_name        = module.bastion_key.bastion_key_name
 #   path_to_user_data_script = "../scripts/install-ansible.sh"
 #   path_to_private_key      = "keys/bastion-key.pem"

@@ -21,9 +21,14 @@ sudo systemctl restart jenkins
 # check scripts/install-maven-as-jenkins-agent.sh
 ```
 
-### 2. Config node on `Jenkins`
+### 2. Config Nodes on `Jenkins`
 
-#### 2.1: Go to `Dashboard` > `Node` > `New Node`
+#### 2.1: Go to `Dashboard` > `Node` > `Built-In Node`:Add label for build-in node
+```t
+label-name: built-in
+```
+
+#### 2.2: Go to `Dashboard` > `Node` > `New Node`
 ```t
 Name: maven
 Description: Maven instance for building java project
@@ -50,9 +55,8 @@ sudo su
 ssh-keyscan 10.100.5.88 >> /var/lib/jenkins/.ssh/known_hosts
 ```
 
-#### 2.2 Create Project for Jenkins
+#### 2.3 Create Project for Jenkins
 1. Create new `Pipeline Project`: first-demo-project
-2. Build Triggers: chonj
 
 ## III. Build with `Maven` Project with `Jenkins Pipeline`:
 
@@ -83,3 +87,9 @@ Schedule:
 ```
 
 ![alt text](images/jenkins-scm.png)
+
+### Create `tomcat-ssh-key` credentials for pipeline
+
+1. Go to `Manage Jenkins` > `Credentials` >  `System`
+2. Create SSH credentials with key with ID `tomcat-ssh-key` and `username: ec2-user`
+3. edit pipepline with `ssh private key name: tomcat-ssh-key`
