@@ -60,6 +60,21 @@ module "security-groups" {
       cidr_blocks = "0.0.0.0/0"
   }]
 
+  sonar_ingress = [{
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "The ingress for ssh protocol"
+    cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      from_port   = 9000
+      to_port     = 9000
+      protocol    = "tcp"
+      description = "The ingress for sonar webserver"
+      cidr_blocks = "0.0.0.0/0"
+  }]
+
   tags = local.common_tags
 }
 
@@ -69,31 +84,54 @@ module "bastion_key" {
   path_to_public_key = "keys/bastion-key.pem.pub"
 }
 
+module "worker_key" {
+  source             = "../modules/ec2-key-pair"
+  key_name           = "ec2-worker-key-pair"
+  path_to_public_key = "keys/worker.pem.pub"
+}
+
 # terraform apply -auto-approve -target=module.vpc -target=module.security-groups -target=module.bastion_key -target=module.jenkins
-module "jenkins" {
+# module "jenkins" {
+#   source                   = "../modules/ec2-instance"
+#   module_name              = "jenkins-host"
+#   instance_name            = "jenkins-instance"
+#   instance_type            = "t3.small"
+#   instance_key_name        = module.bastion_key.bastion_key_name
+#   path_to_user_data_script = "../scripts/install-jenkins.sh"
+#   path_to_private_key      = "keys/bastion-key.pem"
+#   path_to_worker_key       = "keys/worker.pem"
+#   vpc_security_group_ids   = [module.security-groups.jenkins_sg_id]
+#   subnet_id                = module.vpc.public_subnets[0]
+
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "Jenkins-Server"
+#     }
+#   )
+# }
+
+module "sonar_instance" {
   source                   = "../modules/ec2-instance"
-  module_name              = "jenkins-host"
-  instance_name            = "jenkins-instance"
-  instance_type            = "t3.small"
+  module_name              = "sonar-host"
+  instance_name            = "sonar-instance"
+  instance_type            = "t3.medium"
   instance_key_name        = module.bastion_key.bastion_key_name
-  path_to_user_data_script = "../scripts/install-jenkins.sh"
+  path_to_user_data_script = "../scripts/install-sonarqube.sh"
   path_to_private_key      = "keys/bastion-key.pem"
   path_to_worker_key       = "keys/worker.pem"
-  vpc_security_group_ids   = [module.security-groups.jenkins_sg_id]
+  vpc_security_group_ids   = [module.security-groups.sonar_sg_id]
   subnet_id                = module.vpc.public_subnets[0]
 
   tags = merge(
     local.common_tags,
     {
-      Name = "Jenkins-Server"
+      Name = "Sonar-Server"
     }
   )
 }
-
-module "worker_key" {
-  source             = "../modules/ec2-key-pair"
-  key_name           = "ec2-worker-key-pair"
-  path_to_public_key = "keys/worker.pem.pub"
+output "sonar_public_ip" {
+  value = module.sonar_instance.ec2_public_ip
 }
 
 # module "maven_instance" {
@@ -115,24 +153,24 @@ module "worker_key" {
 #   )
 # }
 
-module "web_server" {
-  source                   = "../modules/ec2-instance"
-  is_worker                = true
-  module_name              = "web-server"
-  instance_name            = "web-server-instance"
-  instance_type            = "t3.micro"
-  instance_key_name        = module.worker_key.bastion_key_name
-  path_to_user_data_script = "../scripts/install-tomcat.sh"
-  vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
-  subnet_id                = module.vpc.public_subnets[0]
+# module "web_server" {
+#   source                   = "../modules/ec2-instance"
+#   is_worker                = true
+#   module_name              = "web-server"
+#   instance_name            = "web-server-instance"
+#   instance_type            = "t3.micro"
+#   instance_key_name        = module.worker_key.bastion_key_name
+#   path_to_user_data_script = "../scripts/install-tomcat.sh"
+#   vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
+#   subnet_id                = module.vpc.public_subnets[0]
 
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "Web-Server"
-    }
-  )
-}
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "Web-Server"
+#     }
+#   )
+# }
 
 # module "ansible_control_host" {
 #   source                   = "../modules/ec2-instance"
