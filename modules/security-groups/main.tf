@@ -57,6 +57,22 @@ module "jenkins_agent_sg" {
   tags = var.tags
 }
 
+module "sonar_sg" {
+  source      = "terraform-aws-modules/security-group/aws"
+  version     = "5.1.2"
+  name        = "jenkins-agent-sg"
+  description = "Security group for sonar serverQube with SSH ports open within VPC"
+  vpc_id      = var.vpc_id
+
+  # Ingress rule and CIDR
+ ingress_with_cidr_blocks = var.sonar_ingress
+
+  # Egress rules
+  egress_rules = ["all-all"]
+
+  # resource tags
+  tags = var.tags
+}
 
 module "alb_sg" {
   source      = "terraform-aws-modules/security-group/aws"

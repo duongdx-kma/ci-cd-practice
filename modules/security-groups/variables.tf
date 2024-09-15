@@ -16,7 +16,18 @@ variable bastion_host_ingress {
 }
 
 variable jenkins_ingress {
-  description = "The ingress for bastion host"
+  description = "The ingress for jenkins host"
+  type = list(object({
+    from_port = number
+    to_port = number
+    protocol =  string
+    description = string
+    cidr_blocks = string
+  }))
+}
+
+variable sonar_ingress {
+  description = "The ingress for sonarqube host"
   type = list(object({
     from_port = number
     to_port = number
