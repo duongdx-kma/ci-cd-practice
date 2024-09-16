@@ -18,31 +18,55 @@ resource "aws_iam_role" "codedeploy_service_role" {
 resource "aws_iam_policy" "codedeploy_access_policy" {
   name = "codedeploy_access_policy"
   policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        Action = [
+        "Effect" : "Allow",
+        "Action" : [
           "autoscaling:CompleteLifecycleAction",
           "autoscaling:DeleteLifecycleHook",
           "autoscaling:DescribeAutoScalingGroups",
           "autoscaling:DescribeLifecycleHooks",
           "autoscaling:PutLifecycleHook",
           "autoscaling:RecordLifecycleActionHeartbeat",
-          "ec2:CreateTags",
-          "ec2:DeleteTags",
+          "autoscaling:CreateAutoScalingGroup",
+          "autoscaling:CreateOrUpdateTags",
+          "autoscaling:UpdateAutoScalingGroup",
+          "autoscaling:EnableMetricsCollection",
+          "autoscaling:DescribePolicies",
+          "autoscaling:DescribeScheduledActions",
+          "autoscaling:DescribeNotificationConfigurations",
+          "autoscaling:SuspendProcesses",
+          "autoscaling:ResumeProcesses",
+          "autoscaling:AttachLoadBalancers",
+          "autoscaling:AttachLoadBalancerTargetGroups",
+          "autoscaling:PutScalingPolicy",
+          "autoscaling:PutScheduledUpdateGroupAction",
+          "autoscaling:PutNotificationConfiguration",
+          "autoscaling:PutWarmPool",
+          "autoscaling:DescribeScalingActivities",
+          "autoscaling:DeleteAutoScalingGroup",
           "ec2:DescribeInstances",
-          "ec2:DescribeTags",
-          "ec2:DetachInstances",
-          "ec2:AttachInstances",
-          "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-          "elasticloadbalancing:DescribeInstanceHealth",
+          "ec2:DescribeInstanceStatus",
+          "ec2:TerminateInstances",
+          "tag:GetResources",
+          "sns:Publish",
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:PutMetricAlarm",
+          "elasticloadbalancing:DescribeLoadBalancerAttributes",
+          "elasticloadbalancing:DescribeTargetGroupAttributes",
           "elasticloadbalancing:DescribeLoadBalancers",
-          "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+          "elasticloadbalancing:DescribeInstanceHealth",
+          "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+          "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets"
         ],
-        Effect   = "Allow",
-        Resource = "*"
-      },
-    ],
+        "Resource" : "*"
+      }
+    ]
   })
 }
 
