@@ -73,6 +73,8 @@ module "alb" {
     }
   }
 
+  enable_deletion_protection = false
+
   # Route53 Record(s)
   route53_records = {
     A = {
