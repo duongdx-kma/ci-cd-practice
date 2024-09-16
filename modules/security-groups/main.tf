@@ -155,6 +155,13 @@ module "public_webserver_sg" {
       cidr_blocks = "0.0.0.0/0"
     },
     {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "Allow port 8080 from every where"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
       from_port   = 8443
       to_port     = 8443
       protocol    = "tcp"

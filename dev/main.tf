@@ -96,7 +96,7 @@ module "worker_key" {
 #   module_name              = "jenkins-host"
 #   instance_name            = "jenkins-instance"
 #   instance_type            = "t3.small"
-#   instance_key_name        = module.bastion_key.bastion_key_name
+#   instance_key_name        = module.bastion_key.key_name
 #   path_to_user_data_script = "../scripts/install-jenkins.sh"
 #   path_to_private_key      = "keys/bastion-key.pem"
 #   path_to_worker_key       = "keys/worker.pem"
@@ -111,28 +111,28 @@ module "worker_key" {
 #   )
 # }
 
-module "sonar_instance" {
-  source                   = "../modules/ec2-instance"
-  module_name              = "sonar-host"
-  instance_name            = "sonar-instance"
-  instance_type            = "t3.medium"
-  instance_key_name        = module.bastion_key.bastion_key_name
-  path_to_user_data_script = "../scripts/install-sonarqube.sh"
-  path_to_private_key      = "keys/bastion-key.pem"
-  path_to_worker_key       = "keys/worker.pem"
-  vpc_security_group_ids   = [module.security-groups.sonar_sg_id]
-  subnet_id                = module.vpc.public_subnets[0]
+# module "sonar_instance" {
+#   source                   = "../modules/ec2-instance"
+#   module_name              = "sonar-host"
+#   instance_name            = "sonar-instance"
+#   instance_type            = "t3.medium"
+#   instance_key_name        = module.bastion_key.key_name
+#   path_to_user_data_script = "../scripts/install-sonarqube.sh"
+#   path_to_private_key      = "keys/bastion-key.pem"
+#   path_to_worker_key       = "keys/worker.pem"
+#   vpc_security_group_ids   = [module.security-groups.sonar_sg_id]
+#   subnet_id                = module.vpc.public_subnets[0]
 
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "Sonar-Server"
-    }
-  )
-}
-output "sonar_public_ip" {
-  value = module.sonar_instance.ec2_public_ip
-}
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "Sonar-Server"
+#     }
+#   )
+# }
+# output "sonar_public_ip" {
+#   value = module.sonar_instance.ec2_public_ip
+# }
 
 # module "maven_instance" {
 #   source                   = "../modules/ec2-instance"
@@ -140,7 +140,7 @@ output "sonar_public_ip" {
 #   module_name              = "maven-host"
 #   instance_name            = "maven-instance"
 #   instance_type            = "t3.micro"
-#   instance_key_name        = module.worker_key.bastion_key_name
+#   instance_key_name        = module.worker_key.key_name
 #   path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
 #   vpc_security_group_ids   = [module.security-groups.jenkins_agent_sg_id]
 #   subnet_id                = module.vpc.public_subnets[1]
@@ -159,7 +159,7 @@ output "sonar_public_ip" {
 #   module_name              = "web-server"
 #   instance_name            = "web-server-instance"
 #   instance_type            = "t3.micro"
-#   instance_key_name        = module.worker_key.bastion_key_name
+#   instance_key_name        = module.worker_key.key_name
 #   path_to_user_data_script = "../scripts/install-tomcat.sh"
 #   vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
 #   subnet_id                = module.vpc.public_subnets[0]
@@ -177,7 +177,7 @@ output "sonar_public_ip" {
 #   module_name              = "ansible-control-host"
 #   instance_name            = "ansible-control-instance"
 #   instance_type            = "t3.micro"
-#   instance_key_name        = module.bastion_key.bastion_key_name
+#   instance_key_name        = module.bastion_key.key_name
 #   path_to_user_data_script = "../scripts/install-ansible.sh"
 #   path_to_private_key      = "keys/bastion-key.pem"
 #   path_to_worker_key       = "keys/worker.pem"
@@ -191,3 +191,50 @@ output "sonar_public_ip" {
 #     }
 #   )
 # }
+
+# -------------------
+module "php_web_server" {
+  source                   = "../modules/ec2-instance"
+  is_worker                = true
+  module_name              = "php-web-server"
+  instance_name            = "php-web-server-instance"
+  instance_type            = "t3.micro"
+  instance_key_name        = module.worker_key.key_name
+  path_to_user_data_script = "../scripts/install-nginx-php.sh"
+  vpc_security_group_ids   = [module.security-groups.public_webserver_sg_id]
+  subnet_id                = module.vpc.public_subnets[0]
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "Web-Server"
+    }
+  )
+}
+
+module "alb" {
+  source                 = "../modules/alb"
+  module_name            = "alb-blue-green"
+  alb_name               = "alb-blue-green"
+  vpc_id                 = module.vpc.vpc_id
+  public_subnets         = module.vpc.public_subnets
+  security_groups        = [module.security-groups.alb_sg_id]
+  route53_domain         = "duongdx.com"
+  application_sub_domain = "laravel.duongdx.com"
+  default_instance_id    = module.php_web_server.ec2_instance_id
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "alb-blue-green"
+    }
+  )
+}
+
+module "codedeploy" {
+  source                 = "../modules/codedeploy"
+  alb_https_listener_arn = module.alb.arn
+  alb_alarm_name         = module.alb.alb_alarm_name
+  alb_green_target_name  = module.alb.target_groups["green-target-group"].arn
+  alb_blue_target_name   = module.alb.target_groups["blue-target-group"].arn
+}
