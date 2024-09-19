@@ -1,5 +1,6 @@
 .idea/
 *.
+*.vagrant
 
 # Local .terraform directories
 **/.terraform/*
