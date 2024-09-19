@@ -4,8 +4,8 @@ variable "vpc_id" {
   type = string
 }
 
-variable bastion_host_ingress {
-  description = "The ingress for bastion host"
+variable cidr_blocks_ingress {
+  description = "The ingress for cidr block"
   type = list(object({
     from_port = number
     to_port = number
@@ -15,25 +15,14 @@ variable bastion_host_ingress {
   }))
 }
 
-variable jenkins_ingress {
-  description = "The ingress for jenkins host"
+variable security_group_ingress {
+  description = "The ingress for with other security group"
   type = list(object({
     from_port = number
     to_port = number
     protocol =  string
     description = string
-    cidr_blocks = string
-  }))
-}
-
-variable sonar_ingress {
-  description = "The ingress for sonarqube host"
-  type = list(object({
-    from_port = number
-    to_port = number
-    protocol =  string
-    description = string
-    cidr_blocks = string
+    source_security_group_id = string
   }))
 }
 
