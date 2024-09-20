@@ -76,11 +76,9 @@ Version Policy:
 ## V. Create `custom Maven2 Repository` in Nexus
 
 ### step-1: create maven2 `snapshot`
-
 ![create maven2 snapshot](images/create-maven2-snapshot.png)
 
 ### step-2: create maven2 `release`
-
 ![create maven2 release](images/create-maven2-release.png)
 
 ### step-3: create maven2 `proxy`
@@ -88,3 +86,136 @@ Version Policy:
 
 ### step-4: create maven2 `group`
 ![create-maven2-group](images/create-maven2-group.png)
+
+## VI. Apply to Java and maven:
+
+### step01: edit `~/.m2/settings.xml`
+
+**make sure: `server->id` match `repository->id`**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <pluginGroups>
+  </pluginGroups>
+  <proxies>
+  </proxies>
+
+    <servers>
+        <server>
+            <id>nexus</id>
+            <username>maven</username>
+            <password>maven</password>
+        </server>
+    </servers>
+
+  <mirrors>
+    <mirror>
+        <id>nexus</id>
+        <mirrorOf>*</mirrorOf>
+        <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
+    </mirror>
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>env-dev</id>
+      <activation>
+        <property>
+          <name>target-env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+      <!-- <properties>
+        <tomcatPath>/path/to/tomcat/instance</tomcatPath>
+      </properties> -->
+    </profile>
+	<profile>
+     <id>snapshot</id>
+     <repositories>
+       <repository>
+         <id>nexus</id>
+         <name>your custom repo</name>
+         <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
+         <!-- <url>http://3.0.51.60:8081/repository/custom-maven-snapshots/</url> -->
+       </repository>
+	   
+     </repositories>
+   </profile>
+    <profile>
+     <id>release</id>
+     <repositories>
+       <repository>
+         <id>nexus</id>
+         <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
+         <!-- <url>http://3.0.51.60:8081/repository/custom-maven-release/</url> -->
+       </repository>
+     </repositories>
+   </profile>
+  </profiles>
+</settings>
+```
+
+### step2: testing with maven:
+```bash
+mvn clean install
+
+mvn test
+```
+
+### step03: check repository: All package are cached on the `create-maven2-group: proxy` repository
+![alt text](images/check-proxy-after-testing.png)
+
+### step04: config `Maven` to publish `snapshot` - edit `pom.xml`
+
+```xml
+...
+<version>0.0.1-SNAPSHOT</version>
+...
+<distributionManagement>
+    <snapshotRepository>
+        <id>nexus</id>
+        <url>http://13.250.122.54:8081/repository/custom-maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+        <id>nexus</id>
+        <url>http://13.250.122.54:8081/repository/custom-maven-releases/</url>
+    </repository>
+</distributionManagement>
+```
+
+### step05: `Maven deploy` and check `SNAPSHOT`:
+
+**command:**
+```bash
+mvn deploy
+```
+
+**check repo**
+![alt text](images/maven-deploy-result.png)
+
+**change version: edit version in `pom.xml`**
+```xml
+<version>0.0.3-SNAPSHOT</version>
+```
+![alt text](images/maven-deploy-result-v3.png)
+
+### step06: `Maven deploy` and check `RELEASE`:
+
+```xml
+<version>0.0.3-RELEASE</version>
+```
+
+**command:**
+```bash
+mvn deploy
+```
+
+**check repo**
+![alt text](images/maven-release-result.png)
+
+**check re-deploy: `ERROR` - because `RELEASE` is `immutable`**
+
+![alt text](images/maven-release-fail-result.png)

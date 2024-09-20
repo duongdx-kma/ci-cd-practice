@@ -61,6 +61,27 @@ module "nexus_sg" {
   )
 }
 
+module "maven_sg" {
+  source = "../modules/security-groups"
+  vpc_id = module.vpc.vpc_id
+  cidr_blocks_ingress = [{
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "The ingress for ssh protocol"
+    cidr_blocks = "0.0.0.0/0"
+  }]
+
+  security_group_ingress = []
+
+  tags = merge(
+    {
+      Name = "maven-server-sg"
+    },
+    local.common_tags
+  )
+}
+
 module "bastion_key" {
   source             = "../modules/ec2-key-pair"
   key_name           = "ec2-bastion-key-pair"
@@ -141,24 +162,32 @@ output "nexus_public_ip" {
 }
 
 
-# module "maven_instance" {
-#   source                   = "../modules/ec2-instance"
-#   is_worker                = true
-#   module_name              = "maven-host"
-#   instance_name            = "maven-instance"
-#   instance_type            = "t3.micro"
-#   instance_key_name        = module.worker_key.bastion_key_name
-#   path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
-#   vpc_security_group_ids   = [module.security-groups.jenkins_agent_sg_id]
-#   subnet_id                = module.vpc.public_subnets[1]
+module "maven_instance" {
+  source                   = "../modules/ec2-instance"
+  is_worker                = true
+  module_name              = "maven-host"
+  instance_name            = "maven-instance"
+  instance_type            = "t3.micro"
+  instance_key_name        = module.worker_key.bastion_key_name
+  path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
+  vpc_security_group_ids   = [module.maven_sg.security_group_id]
+  subnet_id                = module.vpc.public_subnets[1]
 
-#   tags = merge(
-#     local.common_tags,
-#     {
-#       Name = "Maven-Server"
-#     }
-#   )
-# }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "Maven-Server"
+    }
+  )
+}
+
+output "maven_public_ip" {
+  value = module.maven_instance.ec2_public_ip
+}
+
+output "maven_private_ip" {
+  value = module.maven_instance.ec2_private_ip
+}
 
 # module "web_server" {
 #   source                   = "../modules/ec2-instance"
