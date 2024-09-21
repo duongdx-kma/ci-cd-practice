@@ -89,7 +89,7 @@ Version Policy:
 
 ## VI. Apply to Java and maven:
 
-### step01: edit `~/.m2/settings.xml`
+### step-01: edit `~/.m2/settings.xml`
 
 **make sure: `server->id` match `repository->id`**
 
@@ -103,19 +103,19 @@ Version Policy:
   <proxies>
   </proxies>
 
-    <servers>
-        <server>
-            <id>nexus</id>
-            <username>maven</username>
-            <password>maven</password>
-        </server>
-    </servers>
+  <servers>
+    <server>
+        <id>maven-nexus-repo</id>
+        <username>maven</username>
+        <password>{7OWPr9JhJZ7u4u49GhC5XyzEpLP3zGkl9gqBlP9e}</password>
+    </server>
+  </servers>
 
   <mirrors>
     <mirror>
-        <id>nexus</id>
+        <id>maven-nexus-repo</id>
         <mirrorOf>*</mirrorOf>
-        <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
+        <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
     </mirror>
   </mirrors>
 
@@ -136,10 +136,10 @@ Version Policy:
      <id>snapshot</id>
      <repositories>
        <repository>
-         <id>nexus</id>
-         <name>your custom repo</name>
-         <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
-         <!-- <url>http://3.0.51.60:8081/repository/custom-maven-snapshots/</url> -->
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-snapshots/</url> -->
        </repository>
 	   
      </repositories>
@@ -148,9 +148,10 @@ Version Policy:
      <id>release</id>
      <repositories>
        <repository>
-         <id>nexus</id>
-         <url>http://3.0.51.60:8081/repository/custom-maven-group/</url>
-         <!-- <url>http://3.0.51.60:8081/repository/custom-maven-release/</url> -->
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-release/</url> -->
        </repository>
      </repositories>
    </profile>
@@ -165,10 +166,10 @@ mvn clean install
 mvn test
 ```
 
-### step03: check repository: All package are cached on the `create-maven2-group: proxy` repository
+### step-03: check repository: All package are cached on the `create-maven2-group: proxy` repository
 ![alt text](images/check-proxy-after-testing.png)
 
-### step04: config `Maven` to publish `snapshot` - edit `pom.xml`
+### step-04: config `Maven` to publish `snapshot` - edit `pom.xml`
 
 ```xml
 ...
@@ -177,16 +178,16 @@ mvn test
 <distributionManagement>
     <snapshotRepository>
         <id>nexus</id>
-        <url>http://13.250.122.54:8081/repository/custom-maven-snapshots/</url>
+        <url>https://nexus.duongdx.com/repository/custom-maven-snapshots/</url>
     </snapshotRepository>
     <repository>
         <id>nexus</id>
-        <url>http://13.250.122.54:8081/repository/custom-maven-releases/</url>
+        <url>https://nexus.duongdx.com/repository/custom-maven-releases/</url>
     </repository>
 </distributionManagement>
 ```
 
-### step05: `Maven deploy` and check `SNAPSHOT`:
+### step-05: `Maven deploy` and check `SNAPSHOT`:
 
 **command:**
 ```bash
@@ -202,7 +203,7 @@ mvn deploy
 ```
 ![alt text](images/maven-deploy-result-v3.png)
 
-### step06: `Maven deploy` and check `RELEASE`:
+### step-06: `Maven deploy` and check `RELEASE`:
 
 ```xml
 <version>0.0.3-RELEASE</version>
@@ -219,3 +220,42 @@ mvn deploy
 **check re-deploy: `ERROR` - because `RELEASE` is `immutable`**
 
 ![alt text](images/maven-release-fail-result.png)
+
+### step-07: encrypt maven password
+
+**step-07-01: create and encrypt maven `master-password`**
+```powershell
+# command: create master password
+mvn --encrypt-master-password password12345
+
+# result
+{456789fhshdjfsdfsjhf/UgNNDZIe0Q=}
+
+
+# create ~/.m2/settings-security.xml
+<settingsSecurity>
+    <master>{456789fhshdjfsdfsjhf/UgNNDZIe0Q=}</master>
+</settingsSecurity>
+```
+
+**step-07-02: encrypt nexus `password`**
+```powershell
+# command: create master password
+mvn --encrypt-password maven12345
+
+# result
+{7OWPr9JhJZ7u4u49GhC5XyzEpLP3zGkl9gqBlP9e}
+
+# create ~/.m2/settings.xml
+<settings>
+    ...
+    <servers>
+        <server>
+            <id>maven-nexus-repo</id>
+            <username>maven</username>
+            <password>{7OWPr9JhJZ7u4u49GhC5XyzEpLP3zGkl9gqBlP9e}</password>
+        </server>
+    </servers>
+    ...
+</settings>
+```

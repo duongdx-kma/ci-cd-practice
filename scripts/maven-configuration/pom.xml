@@ -101,12 +101,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>nexus</id>
-            <url>http://13.250.122.54:8081/repository/custom-maven-snapshots/</url>
+            <id>maven-nexus-repo</id>
+            <url>https://nexus.duongdx.com/repository/custom-maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>nexus</id>
-            <url>http://13.250.122.54:8081/repository/custom-maven-releases/</url>
+            <id>maven-nexus-repo</id>
+            <url>https://nexus.duongdx.com/repository/custom-maven-releases/</url>
         </repository>
     </distributionManagement>
 </project>

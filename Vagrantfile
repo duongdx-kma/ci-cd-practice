@@ -41,6 +41,19 @@ Vagrant.configure("2") do |config|
         node.vm.provision "setup-nexus", type: "shell", :path => "./scripts/ubuntu/install-nexus-repository.sh"
     end
 
+    config.vm.define "maven" do |node|
+        node.vm.provider "virtualbox" do |vb|
+        vb.name = "maven"
+        vb.memory = 1024
+        vb.cpus = 1
+        end
+        node.vm.hostname = "maven"
+        node.vm.network :private_network, ip: "192.168.63.26"
+        node.vm.network "forwarded_port", guest: 22, host: "61226"
+        node.vm.provision "setup-dns", type: "shell", :path => "./scripts/dns-setup.sh"
+        node.vm.provision "setup-maven", type: "shell", :path => "./scripts/ubuntu/install-maven.sh"
+    end
+
     config.vm.provision "setup-deployment-user", type: "shell" do |s|
         ssh_pub_key = File.readlines("./dev/keys/bastion-key.pem.pub").first.strip
         s.inline = <<-SHELL

@@ -7,19 +7,19 @@
   <proxies>
   </proxies>
 
-    <servers>
-        <server>
-            <id>nexus</id>
-            <username>maven</username>
-            <password>maven</password>
-        </server>
-    </servers>
+  <servers>
+    <server>
+        <id>maven-nexus-repo</id>
+        <username>maven</username>
+        <password>{7OWPr9JhJZ7u4u49GhC5XyzEpLP3zGkl9gqBlP9e}</password>
+    </server>
+  </servers>
 
   <mirrors>
     <mirror>
-        <id>nexus</id>
+        <id>maven-nexus-repo</id>
         <mirrorOf>*</mirrorOf>
-        <url>http://13.250.122.54:8081/repository/custom-maven-group/</url>
+        <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
     </mirror>
   </mirrors>
 
@@ -40,10 +40,10 @@
      <id>snapshot</id>
      <repositories>
        <repository>
-         <id>nexus</id>
-         <name>your custom repo</name>
-         <url>http://13.250.122.54:8081/repository/custom-maven-group/</url>
-         <!-- <url>http://13.250.122.54:8081/repository/custom-maven-snapshots/</url> -->
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-snapshots/</url> -->
        </repository>
 	   
      </repositories>
@@ -52,9 +52,10 @@
      <id>release</id>
      <repositories>
        <repository>
-         <id>nexus</id>
-         <url>http://13.250.122.54:8081/repository/custom-maven-group/</url>
-         <!-- <url>http://13.250.122.54:8081/repository/custom-maven-release/</url> -->
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-release/</url> -->
        </repository>
      </repositories>
    </profile>
