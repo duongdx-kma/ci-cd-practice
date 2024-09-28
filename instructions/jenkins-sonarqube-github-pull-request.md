@@ -4,12 +4,12 @@
 
 ## II. Config `Github` to trigger `Jenkins` whenever `have new pull request be created`:
 
-#### step-01: add Jenkins plugin: `Generic Webhook TriggerVersion`
+#### step-01: add Jenkins plugin: `Generic Webhook Trigger`
 
 #### step-02: config Jenkins Job:
-![config Jenkins Job with Generic Webhook TriggerVersion](images/config-jenkins-job-with-generic-gebhook-triggerversion.png)
+![config Jenkins Job with Generic Webhook Trigger](images/config-jenkins-job-with-generic-gebhook-trigger.png)
 
-## III. Explain the `Github delivery request` and  `Generic Webhook TriggerVersion` params
+## III. Explain the `Github delivery request` and  `Generic Webhook Trigger` params
 
 ### 01: For example `Github delivery request`:
 
@@ -153,7 +153,7 @@ X-GitHub-Hook-Installation-Target-Type: repository
 }
 ```
 
-### 02: Explanation for `Generic Webhook TriggerVersion`
+### 02: Explanation for `Generic Webhook Trigger`
 
 #### Jenkins Parameter: `Post content parameters`
 
