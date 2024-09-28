@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <pluginGroups>
+  </pluginGroups>
+  <proxies>
+  </proxies>
+
+  <servers>
+    <server>
+        <id>maven-nexus-repo</id>
+        <username>maven</username>
+        <password>{7OWPr9JhJZ7u4u49GhC5XyzEpLP3zGkl9gqBlP9e}</password>
+    </server>
+  </servers>
+
+  <mirrors>
+    <mirror>
+        <id>maven-nexus-repo</id>
+        <mirrorOf>*</mirrorOf>
+        <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+    </mirror>
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>env-dev</id>
+      <activation>
+        <property>
+          <name>target-env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+      <!-- <properties>
+        <tomcatPath>/path/to/tomcat/instance</tomcatPath>
+      </properties> -->
+    </profile>
+	<profile>
+     <id>snapshot</id>
+     <repositories>
+       <repository>
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-snapshots/</url> -->
+       </repository>
+	   
+     </repositories>
+   </profile>
+    <profile>
+     <id>release</id>
+     <repositories>
+       <repository>
+         <id>maven-nexus-repo</id>
+         <name>custom-maven-snapshot</name>
+         <url>https://nexus.duongdx.com/repository/custom-maven-group/</url>
+         <!-- <url>https://nexus.duongdx.com/repository/custom-maven-release/</url> -->
+       </repository>
+     </repositories>
+   </profile>
+  </profiles>
+</settings>

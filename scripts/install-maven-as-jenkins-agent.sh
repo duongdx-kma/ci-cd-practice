@@ -19,8 +19,8 @@ MAVEN_DIR=/opt/maven
 wget https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
 mkdir -p $MAVEN_DIR
 tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C $MAVEN_DIR
-ln -s $MAVEN_DIR/apache-maven-$MAVEN_VERSION /opt/maven/latest
-ln -s /opt/maven/latest/bin/mvn /usr/bin/mvn
+ln -s $MAVEN_DIR/apache-maven-$MAVEN_VERSION $MAVEN_DIR/latest
+ln -s $MAVEN_DIR/latest/bin/mvn /usr/bin/mvn
 
 # Verify Maven installation
 mvn -version

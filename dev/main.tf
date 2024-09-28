@@ -34,48 +34,52 @@ module "vpc" {
   }
 }
 
-module "security-groups" {
+module "nexus_sg" {
   source = "../modules/security-groups"
   vpc_id = module.vpc.vpc_id
-  bastion_host_ingress = [{
+  cidr_blocks_ingress = [{
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     description = "The ingress for ssh protocol"
+    cidr_blocks = "0.0.0.0/0"
+  }, {
+    from_port   = 8081
+    to_port     = 8081
+    protocol    = "tcp"
+    description = "The ingress for port 8081 protocol"
     cidr_blocks = "0.0.0.0/0"
   }]
 
-  jenkins_ingress = [{
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    description = "The ingress for ssh protocol"
-    cidr_blocks = "0.0.0.0/0"
-    },
+  security_group_ingress = []
+
+  tags = merge(
     {
-      from_port   = 8080
-      to_port     = 8080
-      protocol    = "tcp"
-      description = "The ingress for jenkins"
-      cidr_blocks = "0.0.0.0/0"
-  }]
+      Name = "Nexus-server-sg"
+    },
+    local.common_tags
+  )
+}
 
-  sonar_ingress = [{
+module "maven_sg" {
+  source = "../modules/security-groups"
+  vpc_id = module.vpc.vpc_id
+  cidr_blocks_ingress = [{
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     description = "The ingress for ssh protocol"
     cidr_blocks = "0.0.0.0/0"
-    },
-    {
-      from_port   = 9000
-      to_port     = 9000
-      protocol    = "tcp"
-      description = "The ingress for sonar webserver"
-      cidr_blocks = "0.0.0.0/0"
   }]
 
-  tags = local.common_tags
+  security_group_ingress = []
+
+  tags = merge(
+    {
+      Name = "maven-server-sg"
+    },
+    local.common_tags
+  )
 }
 
 module "bastion_key" {
@@ -111,47 +115,79 @@ module "worker_key" {
 #   )
 # }
 
-module "sonar_instance" {
+# module "sonar_instance" {
+#   source                   = "../modules/ec2-instance"
+#   module_name              = "sonar-host"
+#   instance_name            = "sonar-instance"
+#   instance_type            = "t3.small"
+#   instance_key_name        = module.bastion_key.bastion_key_name
+#   path_to_user_data_script = "../scripts/install-sonarqube.sh"
+#   path_to_private_key      = "keys/bastion-key.pem"
+#   path_to_worker_key       = "keys/worker.pem"
+#   vpc_security_group_ids   = [module.security-groups.sonar_sg_id]
+#   subnet_id                = module.vpc.public_subnets[0]
+
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "Sonar-Server"
+#     }
+#   )
+# }
+# output "sonar_public_ip" {
+#   value = module.sonar_instance.ec2_public_ip
+# }
+
+module "nexus_instance" {
   source                   = "../modules/ec2-instance"
-  module_name              = "sonar-host"
-  instance_name            = "sonar-instance"
+  module_name              = "nexus-host"
+  instance_name            = "nexus-instance"
   instance_type            = "t3.medium"
   instance_key_name        = module.bastion_key.bastion_key_name
-  path_to_user_data_script = "../scripts/install-sonarqube.sh"
+  path_to_user_data_script = "../scripts/install-nexus-repository.sh"
   path_to_private_key      = "keys/bastion-key.pem"
   path_to_worker_key       = "keys/worker.pem"
-  vpc_security_group_ids   = [module.security-groups.sonar_sg_id]
+  vpc_security_group_ids   = [module.nexus_sg.security_group_id]
   subnet_id                = module.vpc.public_subnets[0]
 
   tags = merge(
     local.common_tags,
     {
-      Name = "Sonar-Server"
+      Name = "Nexus-Server"
     }
   )
 }
-output "sonar_public_ip" {
-  value = module.sonar_instance.ec2_public_ip
+output "nexus_public_ip" {
+  value = module.nexus_instance.ec2_public_ip
 }
 
-# module "maven_instance" {
-#   source                   = "../modules/ec2-instance"
-#   is_worker                = true
-#   module_name              = "maven-host"
-#   instance_name            = "maven-instance"
-#   instance_type            = "t3.micro"
-#   instance_key_name        = module.worker_key.bastion_key_name
-#   path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
-#   vpc_security_group_ids   = [module.security-groups.jenkins_agent_sg_id]
-#   subnet_id                = module.vpc.public_subnets[1]
 
-#   tags = merge(
-#     local.common_tags,
-#     {
-#       Name = "Maven-Server"
-#     }
-#   )
-# }
+module "maven_instance" {
+  source                   = "../modules/ec2-instance"
+  is_worker                = true
+  module_name              = "maven-host"
+  instance_name            = "maven-instance"
+  instance_type            = "t3.micro"
+  instance_key_name        = module.worker_key.bastion_key_name
+  path_to_user_data_script = "../scripts/install-maven-as-jenkins-agent.sh"
+  vpc_security_group_ids   = [module.maven_sg.security_group_id]
+  subnet_id                = module.vpc.public_subnets[1]
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "Maven-Server"
+    }
+  )
+}
+
+output "maven_public_ip" {
+  value = module.maven_instance.ec2_public_ip
+}
+
+output "maven_private_ip" {
+  value = module.maven_instance.ec2_private_ip
+}
 
 # module "web_server" {
 #   source                   = "../modules/ec2-instance"
