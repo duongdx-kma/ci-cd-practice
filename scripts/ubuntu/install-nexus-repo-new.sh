@@ -96,9 +96,6 @@ ExecStart=$NEXUS_DIR/bin/nexus start
 ExecStop=$NEXUS_DIR/bin/nexus stop
 User=nexus
 Restart=on-abort
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=nexus-%i
 
 [Install]
 WantedBy=multi-user.target
